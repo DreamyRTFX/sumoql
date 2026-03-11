@@ -1,0 +1,49 @@
+{
+  "absenceByDivision": {
+    "Juryo": 30,
+    "Makushita": 28,
+    "Makuuchi": 98,
+    "Sandanme": 0
+  },
+  "basho": 60,
+  "bashoByDivision": {
+    "Juryo": 9,
+    "Makushita": 11,
+    "Makuuchi": 35,
+    "Sandanme": 5
+  },
+  "lossByDivision": {
+    "Juryo": 25,
+    "Makushita": 8,
+    "Makuuchi": 159,
+    "Sandanme": 4
+  },
+  "sansho": {
+    "Gino-sho": 1,
+    "Kanto-sho": 3,
+    "Shukun-sho": 2
+  },
+  "totalAbsences": 156,
+  "totalByDivision": {
+    "Juryo": 105,
+    "Makushita": 49,
+    "Makuuchi": 412,
+    "Sandanme": 35
+  },
+  "totalLosses": 196,
+  "totalMatches": 601,
+  "totalWins": 405,
+  "winsByDivision": {
+    "Juryo": 80,
+    "Makushita": 41,
+    "Makuuchi": 253,
+    "Sandanme": 31
+  },
+  "yusho": 5,
+  "yushoByDivision": {
+    "Juryo": 1,
+    "Makushita": 1,
+    "Makuuchi": 1,
+    "Sandanme": 2
+  }
+}

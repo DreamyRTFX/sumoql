@@ -1,0 +1,27 @@
+{
+  "kimariteLosses": {},
+  "kimariteWins": {
+    "uwatenage": 1
+  },
+  "matches": [
+    {
+      "bashoId": "202303",
+      "division": "Juryo",
+      "day": 15,
+      "matchNo": 15,
+      "eastId": 2,
+      "eastShikona": "Asanoyama",
+      "eastRank": "Juryo 1 East",
+      "westId": 3,
+      "westShikona": "Ochiai",
+      "westRank": "Juryo 14 West",
+      "kimarite": "uwatenage",
+      "winnerId": 2,
+      "winnerEn": "Asanoyama",
+      "winnerJp": ""
+    }
+  ],
+  "opponentWins": 0,
+  "rikishiWins": 1,
+  "total": 1
+}

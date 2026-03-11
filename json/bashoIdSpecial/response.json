@@ -1,0 +1,64 @@
+{
+  "date": "202311",
+  "location": "Fukuoka, Fukuoka International Center",
+  "startDate": "2023-11-12T00:00:00Z",
+  "endDate": "2023-11-26T00:00:00Z",
+  "yusho": [
+    {
+      "type": "Makuuchi",
+      "rikishiId": 7,
+      "shikonaEn": "Kirishima Tetsuo",
+      "shikonaJp": "霧島　鐵力"
+    },
+    {
+      "type": "Juryo",
+      "rikishiId": 8,
+      "shikonaEn": "Kotoshoho Yoshinari",
+      "shikonaJp": "琴勝峰　吉成"
+    },
+    {
+      "type": "Makushita",
+      "rikishiId": 609,
+      "shikonaEn": "Satorufuji Teppei",
+      "shikonaJp": "聖富士(さとるふじ)"
+    },
+    {
+      "type": "Sandanme",
+      "rikishiId": 236,
+      "shikonaEn": "Daishoryu Haruchika",
+      "shikonaJp": "大昇龍(だいしょうりゅう)"
+    },
+    {
+      "type": "Jonidan",
+      "rikishiId": 498,
+      "shikonaEn": "Dairinzan Rin",
+      "shikonaJp": "大凜山(だいりんざん)"
+    },
+    {
+      "type": "Jonokuchi",
+      "rikishiId": 8854,
+      "shikonaEn": "Aonishiki Arata",
+      "shikonaJp": "安青錦　新大"
+    }
+  ],
+  "specialPrizes": [
+    {
+      "type": "Kanto-sho",
+      "rikishiId": 11,
+      "shikonaEn": "Ichiyamamoto Daiki",
+      "shikonaJp": "一山本　大生"
+    },
+    {
+      "type": "Kanto-sho",
+      "rikishiId": 20,
+      "shikonaEn": "Kotozakura Masakatsu",
+      "shikonaJp": "琴櫻　将傑"
+    },
+    {
+      "type": "Kanto-sho",
+      "rikishiId": 74,
+      "shikonaEn": "Atamifuji Sakutaro",
+      "shikonaJp": "熱海富士　朔太郎"
+    }
+  ]
+}
