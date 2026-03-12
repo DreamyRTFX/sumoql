@@ -275,8 +275,8 @@ def build_rikishi_stats(banzuke_data: dict, day: int) -> dict:
             record = rikishi.get("record", [])
             past_record = record[:day - 1]
 
-            wins = sum(1 for r in past_record if r.get("result") == "win")
-            losses = sum(1 for r in past_record if r.get("result") in ("loss", "absent", "fusen-loss"))
+            wins = sum(1 for r in past_record if r.get("result") in ("win", "fusen win"))
+            losses = sum(1 for r in past_record if r.get("result") in ("loss", "absent", "fusen loss"))
 
             form = get_form_string(past_record)
 

@@ -120,6 +120,10 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
         matches_text += "```prolog\n" + "\n".join(named_matches) + "\n```\n"
 
     full_description = f"{header}{matches_text.strip()}"
+    footer = (
+            f"The fusen wins weren't reflecting in scores properly.\n"
+            f"This should now be fixed."
+    )
 
     payload = {
         "username": "Sumo-hooks",
@@ -129,15 +133,23 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
                 "title": time_str,
                 "description": full_description,
                 "color": 2303786,
+
+                "footer": 
+                {
+                "text": footer,
+                "icon_url":""
             }
+            
+        }
         ],
+
     }
     return payload
 
 
 if __name__ == "__main__":
     load_dotenv()
-    endpoints = os.getenv("endpoints", "").split(",")
+    endpoints = os.getenv("testpoint", "").split(",")
     # Programmatic Discovery
     client = SumoAPIClient()
     basho_id = get_current_basho_id()
