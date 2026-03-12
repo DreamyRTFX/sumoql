@@ -149,7 +149,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
 if __name__ == "__main__":
     load_dotenv()
-    endpoints = os.getenv("testpoint", "").split(",")
+    endpoints = os.getenv("endpoints", "").split(",")
     # Programmatic Discovery
     client = SumoAPIClient()
     basho_id = get_current_basho_id()

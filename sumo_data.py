@@ -56,7 +56,7 @@ def get_form_string(record: list) -> str:
     """
     form_chars = []
     for r in record[-5:]:
-        if r.get("result") == "win":
+        if r.get("result") in ("win", "fusen win"):
             form_chars.append("●")
         else:
             form_chars.append("○")
