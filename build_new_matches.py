@@ -29,7 +29,7 @@ def format_match_line(rank: str, shikona: str, wins: int, losses: int, h2h_wins:
     record_padded = f"{record_str:>4}"
     h2h_str = f"{h2h_wins:<2}"
 
-    line = f"{short_rank} {shikona:<13} {record_padded:>4} {h2h_str:>3} {form:>5}"
+    line = f"{short_rank} {shikona:<13} {record_padded:>4} {h2h_str:>3} {form:>6}"
     return line, rank_initial
 
 
@@ -120,10 +120,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
         matches_text += "```prolog\n" + "\n".join(named_matches) + "\n```\n"
 
     full_description = f"{header}{matches_text.strip()}"
-    footer = (
-            f"The fusen wins weren't reflecting in scores properly.\n"
-            f"This should now be fixed."
-    )
+    footer = ""
 
     payload = {
         "username": "Sumo-hooks",
@@ -149,7 +146,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
 if __name__ == "__main__":
     load_dotenv()
-    endpoints = os.getenv("endpoints", "").split(",")
+    endpoints = os.getenv("testpoint", "").split(",")
     # Programmatic Discovery
     client = SumoAPIClient()
     basho_id = get_current_basho_id()
