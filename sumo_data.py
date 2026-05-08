@@ -1,10 +1,10 @@
 """
 sumo_data.py — Common, reusable data logic for sumo builders.
 
-Contains:
-- Pure helper functions (rank parsing, form strings, H2H wins, basho math)
-- Data classes (BashoData, SanyakuData, StakesData)
-- Stats extraction (build_rikishi_stats)
+# Contains:
+# - Pure helper functions (rank parsing, form strings, H2H wins, basho math)
+# - Data classes (BashoData, SanyakuData, StakesData, SummaryData)
+# - Stats extraction (build_rikishi_stats)
 
 No I/O, no formatting, no API calls.
 """
@@ -19,12 +19,12 @@ JST = timezone(timedelta(hours=9))
 # ── Honbasho reference data ───────────────────────────────────────
 
 HONBASHO_DATA = {
-    "01": ("January",   "⛄ Hatsu Basho",   "Tokyo",   "Ryōgoku Kokugikan"),
-    "03": ("March",     "🌸 Haru Basho",    "Osaka",   "Osaka Prefectural Gymnasium (Edion Arena Osaka)"),
-    "05": ("May",       "🌳 Natsu Basho",   "Tokyo",   "Ryōgoku Kokugikan"),
-    "07": ("July",      "🌞 Nagoya Basho",  "Nagoya",  "Aichi International Arena (IG Arena)"),
-    "09": ("September", "🌻 Aki Basho",     "Tokyo",   "Ryōgoku Kokugikan"),
-    "11": ("November",  "🍂 Kyūshū Basho",  "Fukuoka", "Fukuoka Kokusai Center"),
+    "01": ("January",   "⛄ Hatsu Basho",   "Tokyo",   "Ryōgoku Kokugikan", "https://upload.wikimedia.org/wikipedia/commons/d/d7/Ryogoku_Great_Sumo_Hall_%28cropped%29.jpg",    10092543),
+    "03": ("March",     "🌸 Haru Basho",    "Osaka",   "Osaka Prefectural Gymnasium (Edion Arena Osaka)",   "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/EDION_Arena_Osaka.JPG/960px-EDION_Arena_Osaka.JPG",  16029119),
+    "05": ("May",       "🌳 Natsu Basho",   "Tokyo",   "Ryōgoku Kokugikan", "https://upload.wikimedia.org/wikipedia/commons/d/d7/Ryogoku_Great_Sumo_Hall_%28cropped%29.jpg",    1286414),
+    "07": ("July",      "🌞 Nagoya Basho",  "Nagoya",  "Aichi International Arena (IG Arena)",  "https://upload.wikimedia.org/wikipedia/commons/d/dd/NGO_Kita_Meijokoen_20250712_1446a.jpg",   16759040),
+    "09": ("September", "🌻 Aki Basho",     "Tokyo",   "Ryōgoku Kokugikan", "https://upload.wikimedia.org/wikipedia/commons/d/d7/Ryogoku_Great_Sumo_Hall_%28cropped%29.jpg",  16759040),
+    "11": ("November",  "🍂 Kyūshū Basho",  "Fukuoka", "Fukuoka Kokusai Center", "https://storage.googleapis.com/studio-design-asset-files/projects/YPqr7Q7ka5/s-2121x1402_v-frms_webp_b7d9b3e9-13d3-4eb4-bb2b-5cb19667d4ac_middle.webp", 13258768),
 }
 
 
@@ -159,6 +159,8 @@ class BashoData:
         self.name = info[1]
         self.city = info[2]
         self.venue_name = info[3]
+        self.venue_img = info[4]
+        self.color = info[5]
 
         # Prior Basho Context
         if self.month_code == "01":
@@ -259,6 +261,14 @@ class StakesData:
                 rid = r.get("rikishiID")
                 if rid in maeg_ids and rid not in day1_participants:
                     self.kyujo.append(r.get("shikonaEn"))
+
+
+class SummaryData:
+    """Tournament summary data from prior torikumi (Day 15): yusho and special prizes."""
+
+    def __init__(self, prior_torikumi_data):
+        self.yusho = prior_torikumi_data.get("yusho", [])
+        self.special_prizes = prior_torikumi_data.get("specialPrizes", [])
 
 
 # ── Stats extraction ─────────────────────────────────────────────

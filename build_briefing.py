@@ -49,14 +49,14 @@ def _format_row(east, west) -> str:
 def build_briefing_text(basho_data: BashoData, san_yaku_data: SanyakuData, stakes_data: StakesData) -> str:
 
     out = ""
-    out += f"🌸 {basho_data.name.upper()} {basho_data.year} // {basho_data.city.upper()}\n\n"
+    out += f" {basho_data.name.upper()} {basho_data.year} // {basho_data.city.upper()}\n\n"
     out += f"The {basho_data.name} begins in 24 hours.\n\n"
 
     # Logistics
     out += "**LOGISTICS**\n"
     out += f"Dates: {basho_data.start_date_str} — {basho_data.end_date_str} (JST) \n"
     out += f"Venue: {basho_data.venue_name}\n"
-    out += f"Start: {basho_data.daily_start_time} (Daily)\n\n"
+    out += f"Start: {basho_data.daily_start_time}\n\n"
 
     # San'yaku
     out += "**THE SANYAKU**\n"
@@ -78,7 +78,7 @@ def build_briefing_text(basho_data: BashoData, san_yaku_data: SanyakuData, stake
 
     # Stakes
     out += "**STATUS**\n"
-    out += f"Last Yusho: {stakes_data.defending_champ} {basho_data.prior_basho_label}\n"
+    out += f"Last Yusho winner {basho_data.prior_basho_label}: {stakes_data.defending_champ}\n"
 
     kadoban_str = ", ".join(stakes_data.kadoban) if stakes_data.kadoban else "None"
     out += f"Kadoban: {kadoban_str}\n"
@@ -121,14 +121,14 @@ def generate_announcement(target_basho_id: str):
                 "title": title,
                 "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
                 "description": f"```\n{content}```",
-                "color": 13845190,
+                "color": basho.color,
                 "fields": [],
                 "thumbnail": {"url": ""},
                 "image": {
-                    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/EDION_Arena_Osaka.JPG/960px-EDION_Arena_Osaka.JPG"
+                    "url": basho.venue_img
                 },
                 "footer": {
-                    "text": "Osaka Prefectural Gymnasium",
+                    "text": basho.venue_name,
                     "icon_url": "",
                 },
             }
@@ -146,5 +146,5 @@ if __name__ == "__main__":
     endpoints = os.getenv("endpoints", "").split(",")
     testpoint = os.getenv("testpoint", "").split(",")
 
-    payload = generate_announcement("202603")
+    payload = generate_announcement("202605")
     post_webhook(payload, testpoint)

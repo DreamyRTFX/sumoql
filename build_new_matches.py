@@ -109,7 +109,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
     # Construct the output
     header = (
-        f"```ml\n🔴 DAY {day} CARD • UPCOMING MATCHES 🔴 \n"
+        f"```ml\n{basho.name[0]} DAY {day} CARD • UPCOMING MATCHES {basho.name[0]}  \n"
         f"\nRANK     NAME       W-L  VS  FORM\n```"
     )
 
@@ -129,7 +129,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
             {
                 "title": time_str,
                 "description": full_description,
-                "color": 2303786,
+                "color": basho.color,
 
                 "footer": 
                 {
@@ -146,7 +146,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
 if __name__ == "__main__":
     load_dotenv()
-    endpoints = os.getenv("endpoints", "").split(",")
+    endpoints = os.getenv("testpoint", "").split(",")
     # Programmatic Discovery
     client = SumoAPIClient()
     basho_id = get_current_basho_id()
