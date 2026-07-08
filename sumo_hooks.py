@@ -22,11 +22,6 @@ class SumoAPIClient:
         r.raise_for_status()
         return r.json()
 
-    def get_basho_start_date(self, basho_id: str) -> str:
-        """Fetches the start date for a given basho_id by querying Day 1 torikumi."""
-        data = self.get_torikumi(basho_id, day=1)
-        return data.get("startDate")
-
     def get_h2h(self, rikishi_id: int, opponent_id: int) -> Dict[str, Any]:
         r = requests.get(f"{self.BASE_URL}/rikishi/{rikishi_id}/matches/{opponent_id}")
         r.raise_for_status()

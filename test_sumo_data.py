@@ -177,7 +177,7 @@ class TestBuildRikishiStats:
                 "shikonaEn": "SomeRikishi",
                 "record": [
                     {"result": "absent"},
-                    {"result": "fusen-loss"},
+                    {"result": "fusen loss"},
                 ],
             }
         ])
@@ -198,7 +198,7 @@ class TestBashoData:
         basho = BashoData(torikumi)
         assert basho.year == "2026"
         assert basho.month_code == "03"
-        assert basho.name == "Haru Basho"
+        assert basho.name == "🌸 Haru Basho"
         assert basho.city == "Osaka"
         assert basho.start_date_str == "Mar 08"
         assert basho.end_date_str == "Mar 22, 2026"

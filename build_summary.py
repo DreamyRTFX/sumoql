@@ -12,19 +12,26 @@ import sys
 from sumo_hooks import SumoAPIClient, post_webhook
 from sumo_data import (
     get_previous_basho,
+    get_current_basho_id,
+    get_next_basho,
     BashoData,
-    SummaryData,
+    SummaryData
 )
 
 
-def build_summary_text(basho_data: BashoData, summary_data: SummaryData) -> str:
+def build_summary_text(basho_id, summary_data: SummaryData) -> str:
+
+    target_basho = BashoData(basho_id)
+    next_basho = BashoData(get_next_basho(basho_id))
     out = ""
-    # Header logic
-    prior_label = basho_data.prior_basho_label.strip("()").upper()
-    out += f"🌸 {prior_label} SUMMARY\n\n"
+    # Header
+    out += f"The {target_basho.year} {target_basho.month_name_full} {target_basho.name} Summary\n"
+    out += f"   {target_basho.start_date_str} - {target_basho.end_date_str}\n"
+    out += f"   {target_basho.city}, Japan\n"
+    out += f"   {target_basho.venue_name}\n\n"
 
     # Yusho Winners
-    out += "**YUSHO WINNERS**\n"
+    out += "🏆 YUSHO WINNERS 🏆\n"
     if summary_data.yusho:
         for y in summary_data.yusho:
             rank = str(y.get('type')).ljust(10)
@@ -34,7 +41,7 @@ def build_summary_text(basho_data: BashoData, summary_data: SummaryData) -> str:
     out += "\n"
 
     # Special Prizes
-    out += "**SPECIAL PRIZES**\n"
+    out += "🎌 SPECIAL PRIZES 🎌\n"
     if summary_data.special_prizes:
         for p in summary_data.special_prizes:
             prize_type = str(p.get('type')).ljust(10)
@@ -43,11 +50,12 @@ def build_summary_text(basho_data: BashoData, summary_data: SummaryData) -> str:
         out += "None\n"
     out += "\n"
 
-    # Next Tournament Logistics
-    out += "**NEXT TOURNAMENT**\n"
-    out += f"The {basho_data.name} begins {basho_data.start_date_str}.\n"
-    out += f"Dates: {basho_data.start_date_str} — {basho_data.end_date_str} (JST) \n"
-    out += f"Venue: {basho_data.venue_name}\n"
+    # Next Tournament
+    out += "📅 NEXT TOURNAMENT 📅\n"
+    out += f"   {next_basho.name} \n"
+    out += f"   {next_basho.start_date_str} — {next_basho.end_date_str}  \n"
+    out += f"   {next_basho.city}, Japan\n"
+    out += f"   {next_basho.venue_name}\n"
 
     return out
 
@@ -57,16 +65,14 @@ def generate_summary(target_basho_id: str):
 
     prior_basho_id = get_previous_basho(target_basho_id)
 
-    torikumi_data = client.get_torikumi(target_basho_id)
+    # torikumi_data = client.get_torikumi(target_basho_id)
     prior_torikumi = client.get_torikumi(prior_basho_id, day=15)
 
-    basho = BashoData(torikumi_data)
+    basho = BashoData(target_basho_id)
     summary = SummaryData(prior_torikumi)
 
-    content = build_summary_text(basho, summary)
+    content = build_summary_text(prior_basho_id, summary)
     title = "TOURNAMENT SUMMARY"
-
-    prior_label = basho.prior_basho_label.strip("()").upper()
 
     payload = {
         "username": "Sumo-hooks",
@@ -75,21 +81,21 @@ def generate_summary(target_basho_id: str):
         "embeds": [
             {
                 "author": {
-                    "name": f"{prior_label} SUMMARY",
+                    "name": f" SUMMARY",
                     "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
                     "icon_url": "",
                 },
                 "title": title,
                 "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
                 "description": f"```\n{content}```",
-                "color": 13845190,
+                "color": basho.color,
                 "fields": [],
                 "thumbnail": {"url": ""},
                 "image": {
-                    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/EDION_Arena_Osaka.JPG/960px-EDION_Arena_Osaka.JPG"
+                    "url": basho.venue_img,
                 },
                 "footer": {
-                    "text": "Osaka Prefectural Gymnasium",
+                    "text": basho.venue_name,
                     "icon_url": "",
                 },
             }
@@ -104,10 +110,10 @@ def generate_summary(target_basho_id: str):
 
 if __name__ == "__main__":
     load_dotenv()
-    # Respect user request: "do not use endpoints from .env for testing"
     # We will just print to console, unless a specific flag is passed down the line.
     
-    payload = generate_summary("202603")
+    b = get_current_basho_id()
+    payload = generate_summary(b)
     
     # We leave post_webhook available here, if desired, but we won't call it blindly to avoid testing with proper endpoints.
     if len(sys.argv) > 1 and sys.argv[1] == "--post":

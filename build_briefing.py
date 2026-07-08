@@ -78,7 +78,7 @@ def build_briefing_text(basho_data: BashoData, san_yaku_data: SanyakuData, stake
 
     # Stakes
     out += "**STATUS**\n"
-    out += f"Last Yusho winner {basho_data.prior_basho_label}: {stakes_data.defending_champ}\n"
+    out += f"Last Makushita winner: {stakes_data.defending_champ}\n"
 
     kadoban_str = ", ".join(stakes_data.kadoban) if stakes_data.kadoban else "None"
     out += f"Kadoban: {kadoban_str}\n"
@@ -101,7 +101,7 @@ def generate_announcement(target_basho_id: str):
     prior_torikumi = client.get_torikumi(prior_basho_id, day=15)
     prior_banzuke = client.get_banzuke(prior_basho_id)
 
-    basho = BashoData(torikumi_data)
+    basho = BashoData(target_basho_id, torikumi_data)
     sanyaku = SanyakuData(banzuke_data)
     stakes = StakesData(banzuke_data, torikumi_data, prior_torikumi, prior_banzuke)
     content = build_briefing_text(basho, sanyaku, stakes)
@@ -146,5 +146,5 @@ if __name__ == "__main__":
     endpoints = os.getenv("endpoints", "").split(",")
     testpoint = os.getenv("testpoint", "").split(",")
 
-    payload = generate_announcement("202605")
+    payload = generate_announcement("202607")
     post_webhook(payload, testpoint)

@@ -68,6 +68,16 @@ def get_h2h_wins(matches: list, rikishi_id: int) -> int:
     return sum(1 for m in matches if m.get("winnerId") == rikishi_id)
 
 
+def get_next_basho(basho_id: str) -> str:
+    """Given a basho ID like '202511', return the next one ('202601').
+    Handles the January -> November year wrap.
+    """
+    if basho_id[-2:] == "11":
+        return str(int(basho_id) + 90)
+    else:
+        return str(int(basho_id) + 2)
+
+
 def get_previous_basho(basho_id: str) -> str:
     """Given a basho ID like '202603', return the previous one ('202601').
     Handles the January -> November year wrap.
@@ -109,7 +119,7 @@ def get_current_basho_id() -> str:
         return f"{target_year}{target_month:02d}"
 
     # If it's an odd month, check if the tournament is over
-    start_date = get_second_sunday(year, month)
+    start_date = get_second_sunday(year, month) 
     end_date = start_date + timedelta(days=14)  # Day 15 is 14 days after Day 1
 
     if now_jst.date() > end_date:
@@ -150,35 +160,23 @@ def get_current_day(start_date_iso: str) -> int:
 class BashoData:
     """Tournament metadata extracted from torikumi API response."""
 
-    def __init__(self, torikumi_data):
-        self.year = torikumi_data.get("date", "202603")[:4]
-        self.month_code = torikumi_data.get("date", "202603")[-2:]
+    def __init__(self, basho_id, torikumi_data=None):
+        self.year = basho_id[:4]
+        self.month_code = basho_id[-2:]
+        (self.month_name_full, self.name, self.city,
+         self.venue_name, self.venue_img, self.color) = HONBASHO_DATA[self.month_code]
 
-        info = HONBASHO_DATA.get(self.month_code, ("Unknown", "Grand", "Tokyo", "Venue"))
-        self.month_name_full = info[0]
-        self.name = info[1]
-        self.city = info[2]
-        self.venue_name = info[3]
-        self.venue_img = info[4]
-        self.color = info[5]
+        start_date = get_second_sunday(int(self.year), int(self.month_code)) 
+        end_date = start_date + timedelta(days=14)
+        if torikumi_data != None:
+            if torikumi_data.get("date") != '':
+                start_date = datetime.fromisoformat(torikumi_data.get("startDate").replace('Z', '+00:00')).astimezone(JST)
+                end_date = datetime.fromisoformat(torikumi_data.get("endDate").replace('Z', '+00:00')).astimezone(JST)
 
-        # Prior Basho Context
-        if self.month_code == "01":
-            prior_code = "11"
-            self.prior_year = str(int(self.year) - 1)
-        else:
-            prior_code = f"{int(self.month_code) - 2:02d}"
-            self.prior_year = self.year
 
-        prior_info = HONBASHO_DATA.get(prior_code, ("Prior", "", "", ""))
-        self.prior_basho_label = f"({prior_info[0][:3]} {self.prior_year})"
-
-        start_date = torikumi_data.get("startDate", "2026-03-08T00:00:00Z")
-        end_date = torikumi_data.get("endDate", "2026-03-22T00:00:00Z")
-
-        self.start_date_str = datetime.fromisoformat(start_date.replace('Z', '+00:00')).strftime('%b %d')
-        self.end_date_str = datetime.fromisoformat(end_date.replace('Z', '+00:00')).strftime('%b %d, %Y')
-        self.daily_start_time = "8PM EST // 12AM UTC // 9AM JST"
+        self.start_date_str = start_date.strftime('%b %d')
+        self.end_date_str = end_date.strftime('%d, %Y')
+        self.daily_start_time = "8PM EST • 12AM UTC • 9AM JST"
 
 
 class SanyakuData:

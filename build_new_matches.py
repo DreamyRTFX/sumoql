@@ -48,10 +48,10 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
     }
 
     # Tournament info for title
-    basho = BashoData(torikumi_data)
+    basho = BashoData(basho_id, torikumi_data)
     
     # Calculate match dates based on tournament start date and day
-    raw_start = torikumi_data.get("startDate", "2026-03-08T00:00:00Z")
+    raw_start = torikumi_data.get("startDate")
     start_dt = datetime.fromisoformat(raw_start.replace('Z', '+00:00'))
     
     # Day 1 JST = start_dt. Day n JST = start_dt + (day-1)
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     # Programmatic Discovery
     client = SumoAPIClient()
     basho_id = get_current_basho_id()
-    start_date = client.get_basho_start_date(basho_id)
+    start_date = client.get_torikumi(basho_id, day=1).get("startDate")
     day = get_current_day(start_date)
 
     print(f"Targeting Basho: {basho_id}, Day: {day}")
