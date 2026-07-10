@@ -37,6 +37,10 @@ When adding a new post type, follow the same split: extend `sumo_data.py` with a
 - **Form / win-loss counts**: `"win"` and `"fusen win"` (forfeit win) count as wins; `"loss"`, `"absent"`, and `"fusen loss"` count as losses. The form string is the last 5 entries rendered as `●`/`○`.
 - **Kadoban / kyujo** detection in `StakesData` requires *both* the current and prior basho's banzuke + day-1 torikumi — don't drop the prior fetches when refactoring.
 
+### Gotchas
+
+- **Raw JSON files** -- do not injest large json files directly. Probe for structure first.
+
 ### Open work
 
 - **add retirees section to new tournament announcement**
@@ -45,3 +49,8 @@ When adding a new post type, follow the same split: extend `sumo_data.py` with a
 - **Next basho teaser**: similar to briefing but during the off season -- provides a reminder of time until next basho with some fun content
     - Photos, highlight videos, trivia, stats...
 - **Daily results and summaries**: Recap can link to eg. `https://www3.nhk.or.jp/nhkworld/en/tv/sumo/tournament/202605/day15.html`. Results under spoiler.
+- <t:epoch:R> timestamps — your hardcoded 8PM EST is wrong for anyone outside EST. Discord renders <t:1752278400:R> as a live "in 3 hours" localized per viewer. Perfect for the briefing ("begins in 24 hours") and daily card. -- daily/summary
+- **```ansi code blocks** — Discord supports ANSI color codes in code blocks. -- works, adds ~15 characters per block
+- kachi koshi indicator. kinboshi indicator -- summary
+- Banzuke movement: diff current vs prior banzuke (you fetch both already!) — biggest climbers/fallers, shin-nyūmaku debutants, returnees from Juryo. -- briefing
+- Ozeki promotion watch: sekiwake carrying 20+ wins over the last two basho — "needs 13 for promotion" is the pre-tournament storyline when it's live. -- briefing

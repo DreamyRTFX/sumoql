@@ -13,6 +13,7 @@ from sumo_hooks import SumoAPIClient, post_webhook
 from sumo_data import (
     parse_short_rank,
     get_previous_basho,
+    discord_ts,
     BashoData,
     SanyakuData,
     StakesData,
@@ -49,8 +50,7 @@ def _format_row(east, west) -> str:
 def build_briefing_text(basho_data: BashoData, san_yaku_data: SanyakuData, stakes_data: StakesData) -> str:
 
     out = ""
-    out += f" {basho_data.name.upper()} {basho_data.year} // {basho_data.city.upper()}\n\n"
-    out += f"The {basho_data.name} begins in 24 hours.\n\n"
+    out += f"{basho_data.name.upper()[2:]} {basho_data.year} • {basho_data.city.upper()}, JAPAN\n\n"
 
     # Logistics
     out += "**LOGISTICS**\n"
@@ -78,7 +78,7 @@ def build_briefing_text(basho_data: BashoData, san_yaku_data: SanyakuData, stake
 
     # Stakes
     out += "**STATUS**\n"
-    out += f"Last Makushita winner: {stakes_data.defending_champ}\n"
+    out += f"Last Maku yusho: {stakes_data.defending_champ}\n"
 
     kadoban_str = ", ".join(stakes_data.kadoban) if stakes_data.kadoban else "None"
     out += f"Kadoban: {kadoban_str}\n"
@@ -105,24 +105,32 @@ def generate_announcement(target_basho_id: str):
     sanyaku = SanyakuData(banzuke_data)
     stakes = StakesData(banzuke_data, torikumi_data, prior_torikumi, prior_banzuke)
     content = build_briefing_text(basho, sanyaku, stakes)
-    title = "TOURNAMENT BRIEFING"
+
+    begins_ts = discord_ts(basho.start_dt, "R")
+    first_bout = f"{discord_ts(basho.start_dt, 'F')} ({discord_ts(basho.start_dt, 'R')})"
 
     payload = {
         "username": "Sumo-hooks",
         "avatar_url": "",
-        "content": "Sumo update",
+        "content": f"The **{basho.name}** starts {begins_ts}!",
         "embeds": [
             {
                 "author": {
-                    "name": f"{basho.year} {basho.name.upper()} // {basho.city}",
+                    "name": ">>NHK Highlights<<",
                     "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
                     "icon_url": "",
                 },
-                "title": title,
-                "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
+                "title": ">>sumo.or.jp banzuke<<",
+                "url": "https://www.sumo.or.jp/EnHonbashoBanzuke/index/",
                 "description": f"```\n{content}```",
                 "color": basho.color,
-                "fields": [],
+                "fields": [
+                    {
+                        "name": "🕒 First Bout",
+                        "value": first_bout,
+                        "inline": False,
+                    }
+                ],
                 "thumbnail": {"url": ""},
                 "image": {
                     "url": basho.venue_img

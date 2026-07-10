@@ -155,6 +155,25 @@ def get_current_day(start_date_iso: str) -> int:
     return day
 
 
+def discord_ts(dt: datetime, style: str = "f") -> str:
+    """Return a Discord timestamp tag: <t:UNIX:STYLE>.
+
+    Discord renders these localized to each viewer, and the ``R`` style
+    stays live ("in 2 days" -> "3 hours ago") without re-posting.
+
+    Naive datetimes are assumed to be JST (the tournament's home timezone).
+
+    Styles: t (short time), T (long time), d (short date), D (long date),
+    f (short date/time, default), F (long date/time), R (relative).
+
+    Note: these tags only render in normal content/titles/fields, NOT
+    inside code blocks.
+    """
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=JST)
+    return f"<t:{int(dt.timestamp())}:{style}>"
+
+
 # ── Data classes ──────────────────────────────────────────────────
 
 class BashoData:
@@ -177,6 +196,18 @@ class BashoData:
         self.start_date_str = start_date.strftime('%b %d')
         self.end_date_str = end_date.strftime('%d, %Y')
         self.daily_start_time = "8PM EST • 12AM UTC • 9AM JST"
+
+        # tz-aware datetime for the Day 1 opening bell (00:00 UTC / 09:00 JST),
+        # for building live Discord <t:...> timestamps. start_date may be a
+        # date (calendar fallback) or a datetime (from torikumi).
+        self.start_dt = self._opening_bell(start_date)
+
+    @staticmethod
+    def _opening_bell(start_date) -> datetime:
+        if isinstance(start_date, datetime):
+            return start_date
+        return datetime(start_date.year, start_date.month, start_date.day,
+                        tzinfo=timezone.utc).astimezone(JST)
 
 
 class SanyakuData:

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+
 import pytest
 from sumo_data import (
     parse_short_rank,
@@ -5,6 +7,8 @@ from sumo_data import (
     get_h2h_wins,
     get_previous_basho,
     build_rikishi_stats,
+    discord_ts,
+    JST,
     BashoData,
     SanyakuData,
     StakesData,
@@ -312,3 +316,31 @@ class TestStakesData:
             prior_banzuke=None,
         )
         assert "AbsentGuy" in stakes.kyujo
+
+
+# ── discord_ts ────────────────────────────────────────────────────
+
+class TestDiscordTs:
+    # 2026-07-12 09:00 JST == epoch 1783814400
+    DAY1 = datetime(2026, 7, 12, 9, 0, tzinfo=JST)
+    EPOCH = 1783814400
+
+    def test_default_style_is_f(self):
+        assert discord_ts(self.DAY1) == f"<t:{self.EPOCH}:f>"
+
+    def test_explicit_style(self):
+        assert discord_ts(self.DAY1, "R") == f"<t:{self.EPOCH}:R>"
+
+    def test_naive_datetime_assumed_jst(self):
+        """A tz-naive datetime is treated as JST, matching the aware one."""
+        naive = datetime(2026, 7, 12, 9, 0)
+        assert discord_ts(naive) == f"<t:{self.EPOCH}:f>"
+
+    def test_other_timezone_converts_to_same_instant(self):
+        """Same instant in UTC (00:00) yields the same epoch."""
+        utc = datetime(2026, 7, 12, 0, 0, tzinfo=timezone.utc)
+        assert discord_ts(utc, "R") == f"<t:{self.EPOCH}:R>"
+
+    def test_all_styles_pass_through(self):
+        for style in ("t", "T", "d", "D", "f", "F", "R"):
+            assert discord_ts(self.DAY1, style) == f"<t:{self.EPOCH}:{style}>"

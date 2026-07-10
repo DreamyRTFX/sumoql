@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from sumo_hooks import SumoAPIClient, post_webhook
 from sumo_data import (
     parse_short_rank, get_h2h_wins, build_rikishi_stats, BashoData,
-    get_current_basho_id, get_current_day
+    get_current_basho_id, get_current_day, discord_ts
 )
 
 
@@ -56,11 +56,15 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
     
     # Day 1 JST = start_dt. Day n JST = start_dt + (day-1)
     match_dt_jst = start_dt + timedelta(days=day - 1)
-    # Japan is 1 day ahead of EST
-    match_dt_est = match_dt_jst - timedelta(days=1)
-    
-    time_str = f"{match_dt_est.strftime('%b %e')} 8PM EST • {match_dt_jst.strftime('%b %e')} 12AM UTC / 9AM JST"
+
+    # Live, per-viewer-localized timestamps (render in message content only).
+    time_str = f"Day {day} • {match_dt_jst.strftime('%b %e, %Y')}"
     title = f"{basho.name} — {basho.city}, {basho.month_name_full} {basho.year}"
+    content = (
+        f"{title}\n"
+        f"🕒 Day {day} bouts begin {discord_ts(match_dt_jst, 'R')} "
+        f"• {discord_ts(match_dt_jst, 'f')}"
+    )
 
     # Build stats from common logic
     rikishi_stats = build_rikishi_stats(banzuke_data, day)
@@ -124,7 +128,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
     payload = {
         "username": "Sumo-hooks",
-        "content": title,
+        "content": content,
         "embeds": [
             {
                 "title": time_str,
