@@ -28,6 +28,44 @@ HONBASHO_DATA = {
 }
 
 
+# ── Discord ANSI code reference ───────────────────────────────────
+# Name → code maps for the sequences Discord's ```ansi code blocks support.
+# This is the WHOLE supported set — no 256-color, no truecolor.
+# Confirmed by eyeballing rendered output (see post_ansi_test.py).
+#
+# The trick lives in ESC: it MUST be the raw U+001B byte. You cannot type it;
+# json.dumps encodes it as "" on the wire and Discord decodes it back.
+# The block MUST be fenced ```ansi (a plain ``` renders the codes as text).
+
+ESC = "\x1b"                 # the real ESC byte — the whole trick lives here
+RESET = f"{ESC}[0m"
+
+ANSI_STYLE = {"normal": 0, "bold": 1, "underline": 4}
+ANSI_FG = {"gray": 30, "red": 31, "green": 32, "yellow": 33,
+           "blue": 34, "pink": 35, "cyan": 36, "white": 37}
+ANSI_BG = {"dark": 40, "orange": 41, "marble": 42, "gray": 43,
+           "blue_gray": 44, "indigo": 45, "silver": 46, "white": 47}
+
+
+def ansi(text, fg=None, bg=None, style=None) -> str:
+    """Wrap text in a Discord-supported ANSI sequence. Codes combine as style;fg;bg."""
+    codes = []
+    if style is not None:
+        codes.append(str(ANSI_STYLE[style]))
+    if fg is not None:
+        codes.append(str(ANSI_FG[fg]))
+    if bg is not None:
+        codes.append(str(ANSI_BG[bg]))
+    if not codes:
+        return text
+    return f"{ESC}[{';'.join(codes)}m{text}{RESET}"
+
+
+def ansi_block(body: str) -> str:
+    """Wrap body in an ```ansi fenced code block for Discord."""
+    return f"```ansi\n{body}\n```"
+
+
 # ── Pure helper functions ─────────────────────────────────────────
 
 def parse_short_rank(rank_str: str) -> dict:

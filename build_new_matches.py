@@ -13,14 +13,25 @@ from dotenv import load_dotenv
 from sumo_hooks import SumoAPIClient, post_webhook
 from sumo_data import (
     parse_short_rank, get_h2h_wins, build_rikishi_stats, BashoData,
-    get_current_basho_id, get_current_day, discord_ts
+    get_current_basho_id, get_current_day, discord_ts, ansi, ansi_block
 )
 
 
 # ── Match-card-specific formatting ───────────────────────────────
 
+# Rank initial → (fg color, style) for ANSI line coloring. Default background.
+RANK_ANSI = {
+    "J": ("green", None),      # Juryo
+    "M": ("blue", None),       # Maegashira
+    "K": ("cyan", None),       # Komusubi
+    "S": ("red", None),        # Sekiwake
+    "O": ("pink", "bold"),       # Ozeki
+    "Y": ("yellow", "bold"),   # Yokozuna
+}
+
+
 def format_match_line(rank: str, shikona: str, wins: int, losses: int, h2h_wins: int, form: str) -> tuple[str, str]:
-    """Returns a padded string line for the rikishi and their rank initial for coloring."""
+    """Returns an ANSI-colored line for the rikishi (colored by rank) and their rank initial."""
     parsed = parse_short_rank(rank)
     short_rank = parsed["short"]
     rank_initial = parsed["initial"]
@@ -30,7 +41,10 @@ def format_match_line(rank: str, shikona: str, wins: int, losses: int, h2h_wins:
     h2h_str = f"{h2h_wins:<2}"
 
     line = f"{short_rank} {shikona:<13} {record_padded:>4} {h2h_str:>3} {form:>6}"
-    return line, rank_initial
+
+    fg, style = RANK_ANSI.get(rank_initial, ("white", None))
+    colored = ansi(line, fg=fg, style=style)
+    return colored, rank_initial
 
 
 # ── Build the payload ────────────────────────────────────────────
@@ -111,19 +125,18 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
         else:
             m_matches.append(match_str)
 
-    # Construct the output
-    header = (
-        f"```ml\n{basho.name[0]} DAY {day} CARD • UPCOMING MATCHES {basho.name[0]}  \n"
-        f"\nRANK     NAME       W-L  VS  FORM\n```"
-    )
+    # Construct the output. Everything lives in one ```ansi block so the
+    # per-line rank colors render (a plain/prolog block would show the codes).
+    title_line = ansi(f"{basho.name[0]} DAY {day} CARD • UPCOMING MATCHES {basho.name[0]}",
+                      fg="yellow", style="bold")
+    header_line = "RANK     NAME       W-L  VS  FORM"
 
-    matches_text = ""
-    if m_matches:
-        matches_text += "```\n" + "\n".join(m_matches) + "\n```\n"
-    if named_matches:
-        matches_text += "```prolog\n" + "\n".join(named_matches) + "\n```\n"
+    body_lines = [title_line, "", header_line, ""]
 
-    full_description = f"{header}{matches_text.strip()}"
+    body_lines.extend(m_matches)
+    body_lines.extend(named_matches)
+    
+    full_description = ansi_block("\n".join(body_lines))
     footer = ""
 
     payload = {
@@ -131,7 +144,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
         "content": content,
         "embeds": [
             {
-                "title": time_str,
+                "title": "",
                 "description": full_description,
                 "color": basho.color,
 
