@@ -127,7 +127,7 @@ def build_new_matches_payload(basho_id: str, day: int) -> dict:
 
     # Construct the output. Everything lives in one ```ansi block so the
     # per-line rank colors render (a plain/prolog block would show the codes).
-    title_line = ansi(f"{basho.name[0]} DAY {day} CARD • UPCOMING MATCHES {basho.name[0]}",
+    title_line = ansi(f"    {basho.name[0]} DAY {day} MAKUUCHI MATCHES {basho.name[0]}",
                       fg="yellow", style="bold")
     header_line = "RANK     NAME       W-L  VS  FORM"
 
