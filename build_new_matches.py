@@ -13,22 +13,12 @@ from dotenv import load_dotenv
 from sumo_hooks import SumoAPIClient, post_webhook
 from sumo_data import (
     parse_short_rank, get_h2h_wins, build_rikishi_stats, BashoData,
-    get_current_basho_id, get_current_day, discord_ts, ansi, ansi_block
+    get_current_basho_id, get_current_day, discord_ts, ansi, ansi_block,
+    RANK_ANSI
 )
 
 
 # ── Match-card-specific formatting ───────────────────────────────
-
-# Rank initial → (fg color, style) for ANSI line coloring. Default background.
-RANK_ANSI = {
-    "J": ("green", None),      # Juryo
-    "M": ("blue", None),       # Maegashira
-    "K": ("cyan", None),       # Komusubi
-    "S": ("red", None),        # Sekiwake
-    "O": ("pink", "bold"),       # Ozeki
-    "Y": ("yellow", "bold"),   # Yokozuna
-}
-
 
 def format_match_line(rank: str, shikona: str, wins: int, losses: int, h2h_wins: int, form: str) -> tuple[str, str]:
     """Returns an ANSI-colored line for the rikishi (colored by rank) and their rank initial."""

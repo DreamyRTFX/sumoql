@@ -15,49 +15,125 @@ from sumo_data import (
     get_current_basho_id,
     get_next_basho,
     BashoData,
-    SummaryData
+    SummaryData,
+    ansi,
+    ansi_block,
+    RANK_ANSI,
+    SPECIAL_PRIZES,
 )
+
+
+# ── Summary-specific formatting ──────────────────────────────────
+
+WIDTH = 40
+RULE = "═" * WIDTH
+THIN_RULE = "─" * WIDTH
+
+
+DIVISION_COL = 10
+PRIZE_COL = 10
+NAME_COL = 12
+
+
+def _center(text: str) -> str:
+    """Center plain text within WIDTH columns.
+
+    Always call this BEFORE ansi() — escape codes count toward len() but
+    have no visible width, so centering colored text pulls it off-center.
+    Lines longer than WIDTH are returned unpadded.
+    """
+    return text.center(WIDTH).rstrip()
+
+
+def _shikona(full_name: str) -> str:
+    """Surname only, clipped to the name column.
+
+    The yusho/specialPrizes payloads carry the full name ("Kirishima
+    Tetsuo"), unlike banzuke which is already surname-only. The given name
+    would overflow NAME_COL and break the column alignment.
+    """
+    return str(full_name).split(" ")[0][:NAME_COL]
+
+
+def _award_row(label: str, label_width: int, full_name: str) -> str:
+    """A label column and a name column, each centered within its own width.
+
+    Every row comes out the same total width, so once _center() places the
+    row the columns line up down the block regardless of name length.
+    """
+    return f"{label.center(label_width)} • {_shikona(full_name).center(NAME_COL)}"
+
+
+def _division_ansi(division: str) -> tuple:
+    """(fg, style) for a division, borrowed from the shared RANK_ANSI map.
+
+    Divisions have no colors of their own, so the six of them are mapped onto
+    the six rank colors by seniority: the top division takes the top rank's
+    color, and so on down. Matched on the full name, not the initial —
+    division initials collide (Makuuchi/Makushita, Juryo/Jonidan/Jonokuchi).
+    """
+    divisions = ("Makuuchi", "Juryo", "Makushita",
+                 "Sandanme", "Jonidan", "Jonokuchi")
+    ranks = ("Y", "O", "S", "K", "M", "J")  # RANK_ANSI keys, most senior first
+    rank_key = dict(zip(divisions, ranks)).get(division, "")
+    return RANK_ANSI.get(rank_key, ("white", None))
 
 
 def build_summary_text(basho_id, summary_data: SummaryData) -> str:
 
     target_basho = BashoData(basho_id)
     next_basho = BashoData(get_next_basho(basho_id))
-    out = ""
-    # Header
-    out += f"The {target_basho.year} {target_basho.month_name_full} {target_basho.name} Summary\n"
-    out += f"   {target_basho.start_date_str} - {target_basho.end_date_str}\n"
-    out += f"   {target_basho.city}, Japan\n"
-    out += f"   {target_basho.venue_name}\n\n"
+    lines = []
 
-    # Yusho Winners
-    out += "🏆 YUSHO WINNERS 🏆\n"
+    # Header
+    lines.append(RULE)
+    lines.append(ansi(
+        _center(f"{target_basho.year} {target_basho.month_name_full} {target_basho.name}"),
+        fg="yellow", style="bold"))
+    lines.append(ansi(_center("SUMMARY"), fg="yellow"))
+    lines.append(_center(f"{target_basho.start_date_str} - {target_basho.end_date_str}"))
+    lines.append(_center(f"{target_basho.city}, Japan"))
+    lines.append(_center(target_basho.venue_name))
+    lines.append(RULE)
+    lines.append("")
+
+    # Yusho Winners — one line per division, colored by division.
+    lines.append(ansi(_center("🏆 YUSHO WINNERS 🏆"), fg="yellow", style="bold"))
+    lines.append("")
     if summary_data.yusho:
         for y in summary_data.yusho:
-            rank = str(y.get('type')).ljust(10)
-            out += f"{rank}: {y.get('shikonaEn')}\n"
+            division = str(y.get("type"))
+            fg, style = _division_ansi(division)
+            row = _award_row(division, DIVISION_COL, y.get("shikonaEn"))
+            lines.append(ansi(_center(row), fg=fg, style=style))
     else:
-        out += "None\n"
-    out += "\n"
+        lines.append(_center("None"))
+    lines.append("")
 
-    # Special Prizes
-    out += "🎌 SPECIAL PRIZES 🎌\n"
+    # Special Prizes — English name on its own line beneath each winner.
+    lines.append(ansi(_center("🎌 SPECIAL PRIZES 🎌"), fg="red", style="bold"))
+    lines.append("")
     if summary_data.special_prizes:
         for p in summary_data.special_prizes:
-            prize_type = str(p.get('type')).ljust(10)
-            out += f"{prize_type}: {p.get('shikonaEn')}\n"
+            prize_type = str(p.get("type"))
+            english, _reason = SPECIAL_PRIZES.get(prize_type, (prize_type, ""))
+            row = _award_row(prize_type, PRIZE_COL, p.get("shikonaEn"))
+            lines.append(ansi(_center(row), fg="red"))
+            lines.append(ansi(_center(f"({english})"), fg="white"))
     else:
-        out += "None\n"
-    out += "\n"
+        lines.append(_center("None"))
+    lines.append("")
 
     # Next Tournament
-    out += "📅 NEXT TOURNAMENT 📅\n"
-    out += f"   {next_basho.name} \n"
-    out += f"   {next_basho.start_date_str} — {next_basho.end_date_str}  \n"
-    out += f"   {next_basho.city}, Japan\n"
-    out += f"   {next_basho.venue_name}\n"
+    lines.append(THIN_RULE)
+    lines.append(ansi(_center("SEE YOU NEXT TOURNAMENT!"), fg="green", style="bold"))
+    lines.append(_center(next_basho.name))
+    lines.append(_center(f"{next_basho.start_date_str} — {next_basho.end_date_str}"))
+    lines.append(_center(f"{next_basho.city}, Japan"))
+    lines.append(_center(next_basho.venue_name))
+    lines.append(RULE)
 
-    return out
+    return "\n".join(lines)
 
 
 def generate_summary(target_basho_id: str):
@@ -68,35 +144,30 @@ def generate_summary(target_basho_id: str):
     # torikumi_data = client.get_torikumi(target_basho_id)
     prior_torikumi = client.get_torikumi(prior_basho_id, day=15)
 
-    basho = BashoData(target_basho_id)
+    basho = BashoData(prior_basho_id)
     summary = SummaryData(prior_torikumi)
 
     content = build_summary_text(prior_basho_id, summary)
-    title = "TOURNAMENT SUMMARY"
 
     payload = {
         "username": "Sumo-hooks",
         "avatar_url": "",
-        "content": "Sumo update",
+        "content": f"The {basho.year} {basho.name} is concluded. Click the spoiler to show results.",
         "embeds": [
             {
                 "author": {
-                    "name": f" SUMMARY",
-                    "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
-                    "icon_url": "",
+
                 },
-                "title": title,
-                "url": "https://www3.nhk.or.jp/nhkworld/en/tv/sumo/",
-                "description": f"```\n{content}```",
+                "title": "",
+                "description": f"|| {ansi_block(content)} ||",
                 "color": basho.color,
                 "fields": [],
                 "thumbnail": {"url": ""},
                 "image": {
-                    "url": basho.venue_img,
+
                 },
                 "footer": {
-                    "text": basho.venue_name,
-                    "icon_url": "",
+
                 },
             }
         ],

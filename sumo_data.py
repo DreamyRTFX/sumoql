@@ -66,6 +66,33 @@ def ansi_block(body: str) -> str:
     return f"```ansi\n{body}\n```"
 
 
+# Rank initial (from parse_short_rank) → (fg color, style) for ANSI line
+# coloring. Default background. Shared by every builder that colors a
+# rikishi line by rank.
+RANK_ANSI = {
+    "J": ("green", None),      # Juryo
+    "M": ("blue", None),       # Maegashira
+    "K": ("cyan", None),       # Komusubi
+    "S": ("red", None),        # Sekiwake
+    "O": ("pink", "bold"),     # Ozeki
+    "Y": ("yellow", "bold"),   # Yokozuna
+}
+
+
+# ── Special prize reference ───────────────────────────────────────
+# Romanized prize name (the API's specialPrizes[].type) → (English name,
+# what it's awarded for).
+
+SPECIAL_PRIZES = {
+    "Shukun-sho": ("Outstanding Performance",
+                   "Beating the yusho winner or a yokozuna"),
+    "Kanto-sho":  ("Fighting Spirit",
+                   "A strong record and relentless effort"),
+    "Gino-sho":   ("Technique",
+                   "The most skillful sumo of the basho"),
+}
+
+
 # ── Pure helper functions ─────────────────────────────────────────
 
 def parse_short_rank(rank_str: str) -> dict:
